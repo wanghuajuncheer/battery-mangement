@@ -1,0 +1,47 @@
+INIT _BootStart
+
+NAMES 
+
+END 
+
+SEGMENTS  /* Here all RAM/ROM areas of the device are listed. Used in PLACEMENT below. */
+            
+      /* 
+      Area 0x3800-0x38FF is reserved for stack. Stack pointer is initialized in StartS12X.s file
+      to initail value 0x3900.
+      Area 0x3900-0x3CFF is used for standard purposes.      
+      Area 0x3D00-0x3EFF is used for functions that must be executed from RAM memory. These functions
+      are stored in flash memory in RAM_CODE_SEG (see below) and are copied to RAM memory after startup. 
+      Area 0x3F00-0x3FFF is used for interrupt vector table.
+      */            
+      EEPROM        = READ_ONLY     0x0C00 TO   0x0FFF;
+ //     EEPROM        = READ_WRITE     0x0C00 TO   0x0FFF;
+      RAM           = READ_WRITE    0x3900 TO   0x3CFF;      
+      RAM_CODE_SEG  = READ_ONLY     0xFD00 TO   0xFEFF RELOCATE_TO 0x3D00;      
+      ROM_F000      = READ_ONLY     0xF000 TO   0xFCFF;
+ 
+END
+
+PLACEMENT /* here all predefined and user segments are placed into the SEGMENTS defined above. */
+
+      ROM_VAR,  
+      STRINGS,  
+      DEFAULT_ROM,
+      NON_BANKED      INTO  ROM_F000;
+
+      DEFAULT_RAM     INTO  RAM;
+
+      RAM_CODE        INTO  RAM_CODE_SEG;
+END
+
+ENTRIES
+//   flash_array
+END
+
+STACKSIZE 0x100
+
+//handle all reset vectors 
+VECTOR 0 _BootStart
+VECTOR 1 _BootStart
+VECTOR 2 _BootStart
+VECTOR ADDRESS 0xFFA2 CAN2RxISR
